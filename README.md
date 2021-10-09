@@ -1,4 +1,4 @@
-#NTRIP CLIENT
+# NTRIP CLIENT
 
 This a cpp implementation of a Ntrip client.
 It uses sockets to connect to the caster (ntrip server).

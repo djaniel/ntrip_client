@@ -2,13 +2,14 @@
 #define NTRIP_CLIENT_H
 
 #include <iostream>
+#include <chrono>
 #include <thread>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <sstream>
 #include <thread>
-//#include <curlpp/cURLpp.hpp>
-//#include <curlpp/Options.hpp>
+#include <ctime>
+#include <iomanip>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -18,35 +19,33 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
-//#include <infix_iterator.h>
 
 #include <base64.h>
 
-using namespace std;
 
 class NtripClient{
 
-    string url_, mount_point_, agent_, user_;
+    std::string url_, mount_point_, agent_, user_, gpgga_;
     int port_ {}, sock_ {};
     bool operating_ {};
-    boost::function<void(string)> callback_;
+    boost::function<void(unsigned char*, ssize_t)> callback_;
     struct sockaddr_in serv_addr_;
 
     std::thread *t_queryServer_ {};
 public:
-    NtripClient(string agent_name,
-                string url,
+    NtripClient(std::string agent_name,
+                std::string url,
                 int port,
-                string mount_point,
-                string user,
-                string password,
-                boost::function<void(string)> const &callback );
+                std::string mount_point,
+                std::string user,
+                std::string password,
+                boost::function<void(unsigned char*, ssize_t)> const &callback );
 
-    NtripClient(string agent_name,
-                string url,
+    NtripClient(std::string agent_name,
+                std::string url,
                 int port,
-                string mount_point,
-                boost::function<void(string)> const &callback );
+                std::string mount_point,
+                boost::function<void(unsigned char*, ssize_t)> const &callback );
 
     ~NtripClient();
 
@@ -54,7 +53,8 @@ public:
         CONNECTED = 0
     };
 
-    string getMountPointString();
+    std::string getMountPointString();
+    void setPosition(std::string gpgga);
     void start();
     void t_queryServer();
 };
