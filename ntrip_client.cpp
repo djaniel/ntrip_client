@@ -25,9 +25,9 @@ NtripClient::NtripClient(
     port_(port),
     mount_point_(mount_point),
     operating_(false),
-    callback_(callback),
     gpgga_("$GPGGA,134658.00,5106.9792,N,11402.3003,W,2,09,1.0,1048.47,M,-16.27,M,08,AAAA*60"),
-    sock_(-1)
+    sock_(-1),
+    callback_(callback)
 {
     std::string usrpswd(user + ":" + password);
     user_= base64_encode(user);
@@ -67,49 +67,38 @@ NtripClient::getMountPointString()
 
 void
 NtripClient::start(){
+    struct hostent * host {nullptr};
+    host = gethostbyname(url_.c_str());
 
-    struct hostent * host = gethostbyname(url_.c_str());
+    if ( (host == nullptr) || (host->h_addr == nullptr) )
+        throw std::runtime_error("Error retrieving ip address from domain. DNS ok?" );
 
-    if ( (host == NULL) || (host->h_addr == NULL) ) {
-        std::cout << "Error retrieving DNS information " << url_.c_str() << std::endl;
-        return;
-    }
     std::string ip = inet_ntoa(*((struct in_addr *)host->h_addr));
 
     if ((sock_ = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        std::cout << "Socket creation error "<< std::endl;
-        return;
-    }
+        throw std::runtime_error( "Socket creation error" );
 
     serv_addr_.sin_family = AF_INET;
-    serv_addr_.sin_port = htons(port_);
+    serv_addr_.sin_port = htons(static_cast<unsigned short> (port_));
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if(inet_pton(AF_INET, ip.c_str(), &serv_addr_.sin_addr)<=0)
-    {
-        std::cout <<  "Invalid address/ Address not supported: " << url_.c_str() << std::endl;
-        return;
-    }
+        throw std::runtime_error( "Invalid address/ Address not supported, DNS ok?" );
+
 
     if(connect(sock_, (struct sockaddr *)&serv_addr_, sizeof(serv_addr_)) < 0)
-    {
-        std::cout <<"Connection Failed"<< std::endl;
-        return;
-    }
+        throw std::runtime_error( "Connection to socket failed" );
 
     int  valread;
-    char buffer[4096] = {0};
+    char buffer[BUFFER_LENGTH] = {0};
     std::string request = getMountPointString();
     send(sock_ , request.c_str() , strlen(request.c_str()) , 0 );
-    valread = read( sock_, buffer, 4096);
+    valread = read( sock_, buffer, BUFFER_LENGTH);
 
-    char *output = NULL;
+    char *output {nullptr};
     output = strstr(buffer, "HTTP/1.1 200 OK");
-    std::cout << gpgga_ << std::endl;
 
     if(output) {
-        std::cout << "Connected to " << url_ << std::endl;
         operating_ = true;
         t_queryServer_ = new std::thread(&NtripClient::t_queryServer, this);
     }
@@ -118,9 +107,8 @@ NtripClient::start(){
 void
 NtripClient::t_queryServer(){
     unsigned int sent_gppga = 60;
-    unsigned char buffer[1024] = {0};
-    unsigned char rtcm_msg[1024]={0};
-    unsigned char *ind_msg;
+    unsigned char buffer[BUFFER_LENGTH] = {0};
+
     ssize_t valread;
 
     send(sock_ , gpgga_.c_str() , strlen(gpgga_.c_str()) , 0 );
@@ -134,11 +122,11 @@ NtripClient::t_queryServer(){
         /*
         According to:
         https://www.use-snip.com/kb/knowledge-base/question-what-ntrip-client-should-i-use/
-        In essence, your code will connect to the Caster (picking which stream),
+        "... your code will connect to the Caster (picking which stream),
         and then pipe that stream over a serial port to your rover GNSS device.
-        You never need to understand or decode RTCM
+        You never need to understand or decode RTCM."
         */
-        valread = read( sock_ , buffer, 1024);
+        valread = read( sock_ , buffer, BUFFER_LENGTH);
         callback_(buffer, valread);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(50));

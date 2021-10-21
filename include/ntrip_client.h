@@ -10,6 +10,8 @@
 #include <thread>
 #include <ctime>
 #include <iomanip>
+#include <stdexcept>
+#include <cstddef>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -22,6 +24,7 @@
 
 #include <base64.h>
 
+#define BUFFER_LENGTH 1024
 
 class NtripClient{
 

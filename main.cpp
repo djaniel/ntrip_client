@@ -11,9 +11,6 @@
 #include <csignal>
 #include <string>
 
-using namespace std;
-
-
 namespace
 {
     volatile std::sig_atomic_t gSignalStatus;
@@ -41,18 +38,21 @@ int main() {
     std::string usrpsd ("centipede");
     std::string caster ("caster.centipede.fr");
     NtripClient client(name, caster, 2101, "ENSIL", usrpsd, usrpsd, ntrip_cb);
-    //try{
+    try{
         client.start();
-    //}
-    //catch
+    }
+    catch (const std::runtime_error &e){
+        std::cout << "Runtime error: " << e.what() << std::endl;
+        return -1;
+    }
+    std::cout << "Connected to NTRIP server!" << std::endl;
 
     std::signal(SIGINT, signal_handler);
     sleep(1);
     while (gSignalStatus != 2){
-        //waiting for SIGINT signal Ctrl+C
+        //waiting for SIGINT signal Ctrl+C,
     }
 
-
-    cout << "Exiting, joining thread" << endl; // prints !!!Hello World!!!
+    std::cout << "Exiting, joining thread" << std::endl; // prints !!!Hello World!!!
     return 0;
 }
