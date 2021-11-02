@@ -31,7 +31,7 @@
 
 */
 
-#include "base64.h"
+#include <ntrip_client/base64.h>
 
 #include <algorithm>
 #include <stdexcept>

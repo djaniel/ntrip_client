@@ -10,7 +10,7 @@ find_package(Catch2 REQUIRED)
 add_library(ntripclient 
    src/ntrip_client.cpp
    src/base64.cpp
-   src/base64.h
+   #src/base64.h
 )
 
 ##### Add an alias so that library can be used inside the build tree, e.g. when testing
@@ -28,9 +28,8 @@ target_include_directories(ntripclient
 target_compile_features(ntripclient PRIVATE cxx_auto_type)
 target_link_libraries(ntripclient PRIVATE Threads::Threads)
 
-add_executable(ntripclient_test test/src/main_test.cpp)
-
-target_link_libraries(ntripclient_test PRIVATE Catch2::Catch2WithMain)
+add_executable(main src/main.cpp)
+target_link_libraries(main NTRIPClient::ntripclient)
 
 #target_compile_options(ntripclient PUBLIC $<$<OR:$<COMPILER_ID:GNU>,$<COMPILER_ID:Clang>>:-pthread>)
 

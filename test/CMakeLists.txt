@@ -1,3 +1,0 @@
-add_executable(ntrip_client_test src/main.cpp)
-target_compile_features(ntrip_client_test PRIVATE cxx_auto_type)
-target_link_libraries(ntrip_client_test NTRIPClient::ntripclient)

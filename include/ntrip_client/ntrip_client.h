@@ -22,7 +22,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
-#include <base64.h>
+#include <ntrip_client/base64.h>
 
 #define BUFFER_LENGTH 1024
 
