@@ -7,7 +7,7 @@
 //============================================================================
 
 #include <iostream>
-#include <ntrip_client.h>
+#include <ntrip_client/ntrip_client.h>
 #include <csignal>
 #include <string>
 
