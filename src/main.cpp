@@ -35,9 +35,12 @@ void callback(unsigned char *buffer, ssize_t valread){
 int main() {
     boost::function<void(unsigned char*, ssize_t)> ntrip_cb=boost::bind(&callback, _1, _2);
     std::string name ("ntripclient_cpp/0.1");
-    std::string usrpsd ("centipede");
+    std::string usr ("centipede");
+    std::string psd ("centipede");
     std::string caster ("caster.centipede.fr");
-    NtripClient client(name, caster, 2101, "ENSIL", usrpsd, usrpsd, ntrip_cb);
+    std::string mountingpoint ("ENSIL");
+
+    NtripClient client(name, caster, 2101, mountingpoint, usr, psd, ntrip_cb);
     try{
         client.start();
     }
@@ -53,6 +56,6 @@ int main() {
         //waiting for SIGINT signal Ctrl+C,
     }
 
-    std::cout << "Exiting, joining thread" << std::endl; // prints !!!Hello World!!!
+    std::cout << "Exiting, joining thread" << std::endl;
     return 0;
 }
